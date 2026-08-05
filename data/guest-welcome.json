@@ -1,0 +1,7 @@
+{
+  "fragmentKeys": ["my_dear"],
+  "queryKeys": ["my_dear"],
+  "profiles": {
+    "john": "Welcome, John. Your presence is our blessing."
+  }
+}

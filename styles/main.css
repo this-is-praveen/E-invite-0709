@@ -32,12 +32,30 @@
 body {
     font-family: var(--font-sans);
     background-color: var(--ivory);
+    background-image:
+        radial-gradient(1200px 720px at 12% 18%, rgba(222, 201, 122, 0.24) 0%, transparent 56%),
+        radial-gradient(980px 620px at 88% 16%, rgba(184, 145, 58, 0.2) 0%, transparent 60%),
+        radial-gradient(860px 540px at 50% 92%, rgba(237, 227, 204, 0.72) 0%, transparent 62%),
+        linear-gradient(165deg, #fffdf8 0%, #f8f1df 46%, #efe3c9 100%);
+    background-attachment: fixed;
+    background-size: 160% 160%, 145% 145%, 135% 135%, 100% 100%;
+    animation: appAmbientShift 26s ease-in-out infinite alternate;
     color: var(--dark);
     overflow-x: hidden;
     overflow-y: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+}
+
+@keyframes appAmbientShift {
+    0% {
+        background-position: 0% 0%, 100% 0%, 50% 100%, 50% 50%;
+    }
+
+    100% {
+        background-position: 8% 6%, 94% 10%, 54% 94%, 50% 50%;
+    }
 }
 
 ::selection {
@@ -338,12 +356,20 @@ body.scrollable {
 .hero {
     min-height: 100vh;
     position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-size: cover;
-    background-position: center;
+    background-image:
+        radial-gradient(420px 230px at 50% 12%, rgba(255, 247, 221, 0.5) 0%, transparent 72%),
+        radial-gradient(760px 380px at 50% 102%, rgba(184, 145, 58, 0.16) 0%, transparent 68%),
+        var(--temple-overlay-pattern),
+        linear-gradient(180deg, rgba(255, 254, 249, 0.86) 0%, rgba(245, 236, 218, 0.9) 100%);
+    background-size: auto, auto, 280px 160px, auto;
+    background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+    background-blend-mode: screen, multiply, normal, normal;
+    background-position: center 0%, center 100%, center, center;
     background-attachment: fixed;
 }
 
@@ -357,16 +383,6 @@ body.scrollable {
     .hero {
         background-attachment: scroll;
     }
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(252, 251, 248, 0.85);
 }
 
 .hero-content {
@@ -393,6 +409,55 @@ body.scrollable {
     line-height: 1.15;
     margin: 8px 0 14px;
     color: var(--dark-soft);
+}
+
+.hero-names.typing-prep {
+    opacity: 0;
+}
+
+.hero-names.typing-live {
+    opacity: 1;
+    transition: opacity 0.36s ease;
+}
+
+.hero-names .hero-name-line {
+    display: block;
+    min-height: 1.12em;
+}
+
+.hero-names .hero-amp-line {
+    font-family: var(--font-display);
+    font-size: 0.45em;
+    color: var(--gold);
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    min-height: 1.25em;
+}
+
+.hero-names .hero-type-segment {
+    display: inline-block;
+    min-width: 0.05em;
+}
+
+.hero-names .hero-type-segment.typing-active::after {
+    content: '|';
+    margin-left: 0.05em;
+    color: var(--gold);
+    font-family: var(--font-sans);
+    animation: heroCaretBlink 0.7s steps(1, end) infinite;
+}
+
+@keyframes heroCaretBlink {
+
+    0%,
+    45% {
+        opacity: 1;
+    }
+
+    46%,
+    100% {
+        opacity: 0;
+    }
 }
 
 .hero-date {
@@ -538,8 +603,30 @@ section {
 }
 
 .couple-portraits {
-    background: linear-gradient(180deg, #fffefb 0%, #f9f3e5 100%);
-    border: 1px solid var(--ivory-dark);
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 253, 0.88) 0%, rgba(248, 239, 220, 0.9) 100%),
+        var(--temple-overlay-pattern);
+    border: 1px solid rgba(184, 145, 58, 0.24);
+    box-shadow: 0 12px 34px rgba(117, 92, 53, 0.12);
+    margin-bottom: 34px;
+}
+
+.couple-portraits::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 8% 92%, rgba(222, 201, 122, 0.2) 0%, transparent 44%),
+        radial-gradient(circle at 88% 10%, rgba(184, 145, 58, 0.13) 0%, transparent 38%);
+}
+
+.couple-portraits>* {
+    position: relative;
+    z-index: 1;
 }
 
 .couple-main-photo-wrap {
@@ -555,6 +642,11 @@ section {
     animation: photoFloat 5.8s ease-in-out infinite;
 }
 
+.couple-main-photo-wrap.is-pressing {
+    transform: scale(0.988);
+    box-shadow: 0 8px 24px rgba(143, 107, 42, 0.2);
+}
+
 .couple-main-photo {
     display: block;
     width: 100%;
@@ -565,6 +657,104 @@ section {
     background: linear-gradient(180deg, #f7f1e3 0%, #eee0c0 100%);
     transform: scale(1.01);
     transition: transform 0.6s ease, filter 0.6s ease;
+}
+
+#blessing-easter-egg {
+    position: fixed;
+    left: 50%;
+    bottom: 38px;
+    transform: translateX(-50%) translateY(18px) scale(0.96);
+    width: min(92vw, 460px);
+    padding: 16px 16px;
+    border: 1px solid rgba(184, 145, 58, 0.42);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 252, 245, 0.98) 0%, rgba(244, 232, 207, 0.96) 100%);
+    box-shadow: 0 16px 36px rgba(114, 85, 42, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    color: var(--text-mid);
+    text-align: center;
+    pointer-events: none;
+    z-index: 10020;
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.5s cubic-bezier(.22, .61, .36, 1), opacity 0.45s ease;
+}
+
+#blessing-easter-egg::before {
+    content: '';
+    position: absolute;
+    inset: -22px;
+    border-radius: 18px;
+    background: radial-gradient(circle, rgba(222, 201, 122, 0.28) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0.86);
+}
+
+#blessing-easter-egg .blessing-title {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--gold);
+    font-family: var(--font-serif);
+    font-size: 0.83rem;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+}
+
+#blessing-easter-egg .blessing-text {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.7vw, 1.28rem);
+    font-style: italic;
+    line-height: 1.45;
+}
+
+#blessing-easter-egg.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1);
+    animation: blessingFloat 3.9s ease forwards;
+}
+
+#blessing-easter-egg.active::before {
+    opacity: 1;
+    animation: blessingHalo 2.2s ease-out;
+}
+
+@keyframes blessingFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.95);
+    }
+
+    12% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    82% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px) scale(1.01);
+    }
+}
+
+@keyframes blessingHalo {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    40% {
+        opacity: 0.95;
+        transform: scale(1.02);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.14);
+    }
 }
 
 .couple-main-photo-wrap::after {
@@ -601,10 +791,32 @@ section {
 }
 
 .divine-blessing {
-    background-color: var(--ivory);
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 50% 12%, rgba(255, 249, 230, 0.9) 0%, rgba(245, 237, 220, 0.9) 54%, rgba(238, 226, 199, 0.92) 100%),
+        var(--temple-overlay-pattern);
     padding: 120px 20px;
-    background-image: var(--temple-overlay-pattern);
     background-size: 300px;
+    border: 1px solid rgba(184, 145, 58, 0.26);
+    box-shadow: 0 12px 34px rgba(117, 92, 53, 0.14);
+    margin-bottom: 34px;
+}
+
+.divine-blessing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 88%, rgba(184, 145, 58, 0.16) 0%, transparent 52%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 42%);
+}
+
+.divine-blessing>* {
+    position: relative;
+    z-index: 1;
 }
 
 .deity-relief {
@@ -660,9 +872,31 @@ section {
 
 /* EVENTS GRID */
 .events {
-    background: white;
-    border: 1px solid var(--ivory-dark);
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 252, 0.88) 0%, rgba(244, 235, 214, 0.92) 100%),
+        var(--temple-overlay-pattern);
+    border: 1px solid rgba(184, 145, 58, 0.24);
+    box-shadow: 0 12px 32px rgba(117, 92, 53, 0.12);
     padding-top: 50px;
+    margin-bottom: 34px;
+}
+
+.events::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 12% 12%, rgba(222, 201, 122, 0.18) 0%, transparent 38%),
+        radial-gradient(circle at 88% 90%, rgba(184, 145, 58, 0.14) 0%, transparent 42%);
+}
+
+.events>* {
+    position: relative;
+    z-index: 1;
 }
 
 .events-grid {
@@ -674,7 +908,8 @@ section {
 .event-card {
     padding: 45px 25px;
     border: 1px solid var(--gold-light);
-    background: white;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(254, 249, 237, 0.9) 100%);
+    box-shadow: 0 8px 18px rgba(117, 92, 53, 0.08);
     transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -785,6 +1020,22 @@ section {
     margin-top: 15px;
     letter-spacing: 1px;
     text-transform: uppercase;
+}
+
+.guest-welcome-line {
+    width: fit-content;
+    max-width: min(100%, 680px);
+    margin: 14px auto 6px;
+    padding: 8px 16px;
+    border: 1px solid rgba(184, 145, 58, 0.32);
+    border-radius: 999px;
+    background: rgba(255, 252, 244, 0.76);
+    color: var(--text-mid);
+    font-family: var(--font-serif);
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-align: center;
 }
 
 .scratch-meta {
@@ -1240,6 +1491,15 @@ footer {
         padding: 8px;
     }
 
+    .guest-welcome-line {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 12px;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
     #scratchCanvas {
         height: 270px;
     }
@@ -1265,6 +1525,17 @@ footer {
 
     .footer-couple-showcase {
         padding: 14px 12px 10px;
+    }
+
+    #blessing-easter-egg {
+        bottom: 26px;
+        width: min(94vw, 430px);
+        padding: 14px 12px;
+    }
+
+    #blessing-easter-egg .blessing-title {
+        letter-spacing: 1.8px;
+        font-size: 0.76rem;
     }
 
     .couple-main-photo-wrap {
@@ -1556,6 +1827,21 @@ footer {
         padding: 6px;
     }
 
+    #blessing-easter-egg {
+        bottom: 18px;
+        border-radius: 12px;
+    }
+
+    #blessing-easter-egg .blessing-text {
+        font-size: 0.98rem;
+    }
+
+    .guest-welcome-line {
+        margin-top: 10px;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
     #scratchCanvas {
         height: 300px;
     }
@@ -1648,6 +1934,105 @@ footer {
     z-index: 10002;
     pointer-events: none;
     display: none;
+}
+
+/* Cinematic opening reveal layer */
+#royal-reveal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#royal-reveal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+#royal-reveal-overlay .reveal-flash,
+#royal-reveal-overlay .reveal-sweep,
+#royal-reveal-overlay .reveal-sparkles {
+    position: absolute;
+    inset: 0;
+}
+
+#royal-reveal-overlay .reveal-flash {
+    background:
+        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.72) 0%, rgba(253, 250, 243, 0.48) 24%, rgba(222, 201, 122, 0.2) 50%, transparent 78%),
+        radial-gradient(circle at 50% 50%, rgba(222, 201, 122, 0.18) 0%, transparent 64%);
+    mix-blend-mode: screen;
+    animation: royalFlash 1.9s ease-out forwards;
+}
+
+#royal-reveal-overlay .reveal-sweep {
+    background:
+        linear-gradient(112deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 36%,
+            rgba(255, 255, 255, 0.58) 48%,
+            rgba(255, 255, 255, 0) 61%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: translateX(-130%);
+    filter: blur(0.6px);
+    animation: royalSweep 1.3s 0.22s cubic-bezier(.22, .61, .36, 1) forwards;
+}
+
+#royal-reveal-overlay .reveal-sparkles {
+    background-image:
+        radial-gradient(circle at 24% 38%, rgba(222, 201, 122, 0.75) 0 2px, transparent 3px),
+        radial-gradient(circle at 72% 34%, rgba(222, 201, 122, 0.66) 0 2px, transparent 3px),
+        radial-gradient(circle at 44% 62%, rgba(184, 145, 58, 0.62) 0 1.8px, transparent 2.8px),
+        radial-gradient(circle at 60% 56%, rgba(255, 255, 255, 0.7) 0 1.6px, transparent 2.6px);
+    opacity: 0;
+    animation: royalSparkle 1.25s 0.28s ease-out forwards;
+}
+
+@keyframes royalFlash {
+    0% {
+        opacity: 0;
+    }
+
+    18% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes royalSweep {
+    0% {
+        transform: translateX(-130%);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateX(130%);
+        opacity: 0;
+    }
+}
+
+@keyframes royalSparkle {
+    0% {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    34% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.04);
+    }
 }
 
 /* Hero scroll hint — bouncing arrow */

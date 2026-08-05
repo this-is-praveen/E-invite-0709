@@ -1,5 +1,205 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", async () => {
     const cfg = window.weddingConfig;
+
+    function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function renderHeroNamesStructure() {
+        const heroNamesEl = document.getElementById('hero-names-text');
+        if (!heroNamesEl) return null;
+
+        heroNamesEl.classList.add('typing-prep');
+        heroNamesEl.classList.remove('typing-live');
+
+        heroNamesEl.innerHTML = `
+            <span class="hero-name-line"><span class="hero-type-segment" data-hero-type="bride"></span></span>
+            <span class="hero-amp-line"><span class="hero-type-segment" data-hero-type="amp"></span></span>
+            <span class="hero-name-line"><span class="hero-type-segment" data-hero-type="groom"></span></span>
+        `;
+
+        return {
+            bride: heroNamesEl.querySelector('[data-hero-type="bride"]'),
+            amp: heroNamesEl.querySelector('[data-hero-type="amp"]'),
+            groom: heroNamesEl.querySelector('[data-hero-type="groom"]')
+        };
+    }
+
+    function setHeroNamesInstant(segments) {
+        if (!segments) return;
+        const heroNamesEl = document.getElementById('hero-names-text');
+        if (heroNamesEl) {
+            heroNamesEl.classList.remove('typing-prep');
+            heroNamesEl.classList.add('typing-live');
+        }
+        segments.bride.textContent = cfg.brideName;
+        segments.amp.textContent = '&';
+        segments.groom.textContent = cfg.groomName;
+    }
+
+    async function runHeroTyping(segments) {
+        if (!segments) return;
+
+        const heroNamesEl = document.getElementById('hero-names-text');
+        if (heroNamesEl) {
+            heroNamesEl.classList.remove('typing-prep');
+            heroNamesEl.classList.add('typing-live');
+        }
+
+        const steps = [
+            { el: segments.bride, text: cfg.brideName, speed: 56 },
+            { el: segments.amp, text: '&', speed: 120 },
+            { el: segments.groom, text: cfg.groomName, speed: 56 }
+        ];
+
+        for (const step of steps) {
+            step.el.textContent = '';
+            step.el.classList.add('typing-active');
+
+            for (let i = 1; i <= step.text.length; i += 1) {
+                step.el.textContent = step.text.slice(0, i);
+                await sleep(step.speed);
+            }
+
+            step.el.classList.remove('typing-active');
+            await sleep(140);
+        }
+    }
+
+    const heroNameSegments = renderHeroNamesStructure();
+    let heroTypingPlayed = false;
+
+    async function startHeroTypingOnReveal() {
+        if (heroTypingPlayed) return;
+        heroTypingPlayed = true;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setHeroNamesInstant(heroNameSegments);
+            return;
+        }
+
+        await runHeroTyping(heroNameSegments);
+    }
+
+    async function loadGuestWelcomeConfig() {
+        const defaults = {
+            fragmentKeys: ['my_dear'],
+            queryKeys: ['my_dear'],
+            profiles: {}
+        };
+
+        try {
+            const response = await fetch('data/guest-welcome.json', { cache: 'no-store' });
+            if (!response.ok) return defaults;
+            const parsed = await response.json();
+            return {
+                ...defaults,
+                ...parsed,
+                profiles: parsed && parsed.profiles ? parsed.profiles : defaults.profiles
+            };
+        } catch (err) {
+            console.warn('Guest welcome config could not be loaded, using defaults.', err);
+            return defaults;
+        }
+    }
+
+    const guestWelcomeConfig = await loadGuestWelcomeConfig();
+
+    function decodeParamValue(raw) {
+        if (!raw) return '';
+        const plusFixed = raw.replace(/\+/g, ' ');
+        try {
+            return decodeURIComponent(plusFixed);
+        } catch (_) {
+            return plusFixed;
+        }
+    }
+
+    function normalizeGuestKey(value) {
+        return value.trim().toLowerCase().replace(/\s+/g, '-');
+    }
+
+    function formatGuestDisplayName(value) {
+        return value
+            .trim()
+            .replace(/[-_]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function findParam(params, keys) {
+        for (const key of keys) {
+            const val = params.get(key);
+            if (val && val.trim()) return val.trim();
+        }
+        return '';
+    }
+
+    function resolveGuestTokenFromUrl() {
+        const hashRaw = window.location.hash.startsWith('#')
+            ? window.location.hash.slice(1)
+            : window.location.hash;
+
+        const hashParams = new URLSearchParams(hashRaw);
+        const queryParams = new URLSearchParams(window.location.search);
+
+        const fragmentToken = findParam(hashParams, guestWelcomeConfig.fragmentKeys || []);
+        if (fragmentToken) return fragmentToken;
+
+        return findParam(queryParams, guestWelcomeConfig.queryKeys || []);
+    }
+
+    function resolveGuestProfile(input) {
+        if (!input) return null;
+        const token = decodeParamValue(input).trim();
+        if (!token) return null;
+
+        const profiles = guestWelcomeConfig.profiles || {};
+        const normalizedKey = normalizeGuestKey(token);
+        const profile = profiles[normalizedKey] || profiles[token] || profiles[token.toLowerCase()];
+
+        if (profile) {
+            if (typeof profile === 'string') {
+                return {
+                    name: formatGuestDisplayName(token),
+                    message: profile.trim()
+                };
+            }
+
+            const profileName = (profile.name || token).trim();
+            return {
+                name: profileName,
+                message: (profile.message || '').trim()
+            };
+        }
+
+        return null;
+    }
+
+    const guestWelcomeLineEl = document.getElementById('guest-welcome-line');
+    const scratchInviteLineEl = document.querySelector('.scratch-invite-line');
+    function applyGuestWelcome(profile) {
+        const hasMessage = !!(profile && profile.message);
+
+        if (guestWelcomeLineEl) {
+            guestWelcomeLineEl.textContent = hasMessage ? profile.message : '';
+            guestWelcomeLineEl.style.display = hasMessage ? 'block' : 'none';
+        }
+
+        if (scratchInviteLineEl) {
+            scratchInviteLineEl.textContent = profile && profile.name
+                ? `Welcome, ${profile.name}`
+                : "You're invited";
+        }
+    }
+
+    let resolvedGuestProfile = null;
+    const guestTokenFromUrl = resolveGuestTokenFromUrl();
+    if (guestTokenFromUrl) {
+        resolvedGuestProfile = resolveGuestProfile(guestTokenFromUrl);
+    }
+
+    applyGuestWelcome(resolvedGuestProfile);
 
     function initCursorTrail() {
         if (!window.matchMedia('(pointer: fine)').matches) return;
@@ -93,7 +293,6 @@
     // 1. INJECT CONFIG DATA INTO HTML
     document.getElementById('env-names').innerHTML =
         `${cfg.brideName}<span class="env-ampersand">&amp;</span>${cfg.groomName}`;
-    document.getElementById('hero-names-text').innerHTML = `${cfg.brideName} <br><span style="font-size: 3rem; color: var(--gold);">&</span><br> ${cfg.groomName}`;
     document.getElementById('hero-date-text').textContent = cfg.weddingDateText;
     document.getElementById('hero-venue-text').textContent = cfg.venue;
 
@@ -107,13 +306,82 @@
     // Note: deity image replaced with inline SVG mandala - no img src needed
     document.getElementById('footer-names-text').textContent = `${cfg.brideName} & ${cfg.groomName}`;
 
-    // Set temple overlay pattern + hero image together so blend-mode works correctly
-    const heroEl = document.getElementById('hero-section');
-    heroEl.style.backgroundImage = `var(--temple-overlay-pattern), url('${cfg.heroImage}')`;
-    heroEl.style.backgroundBlendMode = 'overlay';
+    // Hero uses a theme-based CSS background (no image dependency).
     const couplePhotoMainEl = document.getElementById('couple-photo-main');
     couplePhotoMainEl.src = cfg.couplePhoto;
     couplePhotoMainEl.alt = `${cfg.brideName} and ${cfg.groomName} together`;
+
+    const couplePhotoWrapEl = document.querySelector('.couple-main-photo-wrap');
+    let blessingPressTimer = null;
+    let blessingCooldown = false;
+
+    function clearBlessingPress() {
+        if (blessingPressTimer) {
+            clearTimeout(blessingPressTimer);
+            blessingPressTimer = null;
+        }
+        if (couplePhotoWrapEl) {
+            couplePhotoWrapEl.classList.remove('is-pressing');
+        }
+    }
+
+    function getOrCreateBlessingCard() {
+        let card = document.getElementById('blessing-easter-egg');
+        if (card) return card;
+
+        card = document.createElement('div');
+        card.id = 'blessing-easter-egg';
+        card.setAttribute('aria-live', 'polite');
+        card.innerHTML = `
+            <span class="blessing-title">Secret Blessing</span>
+            <span class="blessing-text">May love, laughter, and grace stay with you always.</span>
+        `;
+        document.body.appendChild(card);
+        return card;
+    }
+
+    function triggerSecretBlessing() {
+        if (blessingCooldown) return;
+        blessingCooldown = true;
+
+        const blessingCard = getOrCreateBlessingCard();
+        blessingCard.classList.remove('active');
+        // Force reflow so repeated triggers replay animation.
+        void blessingCard.offsetWidth;
+        blessingCard.classList.add('active');
+
+        playTempleChime();
+        firePoppersAnimation('blessing');
+
+        setTimeout(() => {
+            blessingCard.classList.remove('active');
+        }, 3950);
+
+        setTimeout(() => {
+            blessingCooldown = false;
+        }, 4800);
+    }
+
+    if (couplePhotoMainEl && couplePhotoWrapEl) {
+        const startBlessingPress = (event) => {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+            clearBlessingPress();
+            couplePhotoWrapEl.classList.add('is-pressing');
+            blessingPressTimer = setTimeout(() => {
+                blessingPressTimer = null;
+                triggerSecretBlessing();
+            }, 650);
+        };
+
+        couplePhotoMainEl.addEventListener('pointerdown', startBlessingPress);
+        couplePhotoMainEl.addEventListener('pointerup', clearBlessingPress);
+        couplePhotoMainEl.addEventListener('pointercancel', clearBlessingPress);
+        couplePhotoMainEl.addEventListener('pointerleave', clearBlessingPress);
+        couplePhotoMainEl.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+        });
+    }
+
     document.getElementById('map-iframe').src = cfg.mapIframeSrc;
     document.getElementById('reception-map-iframe').src = cfg.receptionMapIframeSrc;
     // Audio src is set lazily on door open to avoid loading a large MP3 on page load
@@ -148,8 +416,10 @@
     const audio = document.getElementById('bg-audio');
     const musicBtn = document.getElementById('music-btn');
     const particleContainer = document.getElementById('particles-js');
+    const royalRevealOverlay = document.getElementById('royal-reveal-overlay');
     let audioActionInFlight = false;
     let audioPrimed = false;
+    let royalRevealRunning = false;
 
     audio.setAttribute('playsinline', '');
     audio.setAttribute('webkit-playsinline', '');
@@ -227,12 +497,68 @@
         }
     }
 
+    function playTempleChime() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        try {
+            const ac = new AudioCtx();
+            const startAt = ac.currentTime + 0.02;
+
+            const makeTone = (freq, delay, dur, gainPeak) => {
+                const osc = ac.createOscillator();
+                const gain = ac.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startAt + delay);
+                gain.gain.setValueAtTime(0.0001, startAt + delay);
+                gain.gain.exponentialRampToValueAtTime(gainPeak, startAt + delay + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startAt + delay + dur);
+                osc.connect(gain).connect(ac.destination);
+                osc.start(startAt + delay);
+                osc.stop(startAt + delay + dur + 0.03);
+            };
+
+            makeTone(523.25, 0.0, 1.05, 0.06);
+            makeTone(659.25, 0.11, 0.95, 0.045);
+            makeTone(783.99, 0.24, 0.92, 0.034);
+
+            setTimeout(() => {
+                ac.close().catch(() => { });
+            }, 1700);
+        } catch (err) {
+            console.warn('Temple chime could not be played.', err);
+        }
+    }
+
+    function triggerRoyalRevealSequence() {
+        if (royalRevealRunning) return;
+        royalRevealRunning = true;
+
+        playTempleChime();
+        firePoppersAnimation('opening');
+
+        if (royalRevealOverlay) {
+            royalRevealOverlay.classList.remove('active');
+            // Force reflow so repeated opens can replay the animation.
+            void royalRevealOverlay.offsetWidth;
+            royalRevealOverlay.classList.add('active');
+        }
+
+        setTimeout(() => {
+            if (royalRevealOverlay) royalRevealOverlay.classList.remove('active');
+            royalRevealRunning = false;
+        }, 2100);
+    }
+
     openBtn.addEventListener('click', async () => {
         // Prevent double-clicks
         openBtn.disabled = true;
 
         // Prime audio inside a guaranteed user gesture for mobile browsers.
         await primeAudioOnGesture();
+
+        // Start premium cinematic opening effects.
+        triggerRoyalRevealSequence();
 
         // 1. Start door reveal
         doorWrapper.classList.add('open');
@@ -243,6 +569,7 @@
             particleContainer.style.display = 'block';
             initParticles();
             document.body.classList.add('reveal-opened');
+            startHeroTypingOnReveal();
         }
 
         const rightDoor = doorWrapper.querySelector('.door.right');
@@ -254,7 +581,7 @@
             }, { once: true });
         }
 
-        setTimeout(completeOpeningReveal, 1700);
+        setTimeout(completeOpeningReveal, 2050);
     });
 
     musicBtn.addEventListener('click', async () => {
@@ -460,12 +787,15 @@
             initScratchCard();
         }, 100);
     }
-    function firePoppersAnimation() {
+    function firePoppersAnimation(mode = 'celebration') {
         const popCanvas = document.getElementById('popper-canvas');
         popCanvas.style.display = 'block';
         popCanvas.width = window.innerWidth;
         popCanvas.height = window.innerHeight;
         const pCtx = popCanvas.getContext('2d');
+
+        const isOpeningMode = mode === 'opening';
+        const isBlessingMode = mode === 'blessing';
 
         // Theme-matched palette (ivory/gold/crimson accents)
         const PCOLS = [
@@ -488,10 +818,11 @@
         ];
 
         const popParticles = [];
+        const burstCount = isOpeningMode ? 32 : (isBlessingMode ? 22 : 50);
         cannons.forEach(c => {
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < burstCount; i++) {
                 const angle = c.dir + (Math.random() - 0.5) * c.spread;
-                const speed = 11 + Math.random() * 19;
+                const speed = isOpeningMode ? (9 + Math.random() * 11) : (isBlessingMode ? (8 + Math.random() * 9) : (11 + Math.random() * 19));
                 popParticles.push({
                     x: c.x, y: c.y,
                     vx: Math.cos(angle) * speed,
@@ -534,7 +865,7 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.rot += p.rotV;
-                p.life -= 0.006;
+                p.life -= isOpeningMode ? 0.0095 : (isBlessingMode ? 0.0105 : 0.006);
                 if (p.life <= 0 || p.y > popCanvas.height + 80) return;
                 alive = true;
                 pCtx.save();

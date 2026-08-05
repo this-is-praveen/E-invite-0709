@@ -56,8 +56,6 @@
 
             divineBlessingTitle: "Our Divine Guides",
             divineBlessingMessage: "May their grace always guide our path together.",
-
-            heroImage: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop",
             couplePhoto: "images/couple.jpeg",
             coupleFunLine: "One codes with calm, one teaches with spark — together they turn every day into a beautiful celebration.",
             techFunLine: "Praveen G — Silent by nature, introvert at heart, IT guy by craft.",
@@ -106,6 +104,13 @@
     <!-- EFFECT LAYER: Popper/Flower Burst Canvas -->
     <canvas id="popper-canvas" aria-hidden="true"></canvas>
 
+    <!-- CINEMATIC REVEAL OVERLAY -->
+    <div id="royal-reveal-overlay" aria-hidden="true">
+        <div class="reveal-flash"></div>
+        <div class="reveal-sweep"></div>
+        <div class="reveal-sparkles"></div>
+    </div>
+
     <!-- OPENING SCREEN: Envelope + Door Reveal -->
     <div id="door-wrapper">
         <div class="door left"></div>
@@ -126,8 +131,7 @@
         <header class="hero" id="hero-section">
             <div class="hero-content">
                 <h4>We Are Getting Married</h4>
-                <div class="hero-names text-reveal" id="hero-names-text">Name<br><span
-                        style="font-size: 3rem; color: var(--gold);">&</span><br>Name</div>
+                <div class="hero-names text-reveal" id="hero-names-text" aria-label="Couple Names"></div>
                 <div class="kolam-divider-hero kolam-asset"></div>
                 <div class="hero-scroll-hint" aria-hidden="true">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
@@ -143,6 +147,7 @@
             <div class="kolam-section kolam-asset kolam-scale"></div>
             <h2 class="sec-title fade-in-up">Your Invitation Awaits ✨</h2>
             <p class="sec-desc fade-in-up">Scratch below to unveil your wedding celebration</p>
+            <p class="guest-welcome-line fade-in-up" id="guest-welcome-line" aria-live="polite"></p>
             <div class="scratch-card-container fade-in-up">
                 <div class="scratch-meta fade-in-up visible">
                     <div class="scratch-invite-line">You're invited</div>
