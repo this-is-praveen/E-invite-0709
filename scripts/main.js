@@ -355,8 +355,10 @@
             if (itineraryRevealed) return;
             hideHeroScratchHint();
             const rect = canvas.getBoundingClientRect();
-            const actualX = x - rect.left;
-            const actualY = y - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const actualX = (x - rect.left) * scaleX;
+            const actualY = (y - rect.top) * scaleY;
 
             // Erase a smooth circular scratch stroke
             ctx.globalCompositeOperation = 'destination-out';
