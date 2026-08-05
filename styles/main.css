@@ -1237,7 +1237,7 @@ footer {
         right: 8px;
         top: 8px;
         bottom: 8px;
-        padding: 10px 8px;
+        padding: 14px 8px 10px;
     }
 
     .scratch-card-container .scratch-meta .countdown {
@@ -1370,6 +1370,7 @@ footer {
     .scratch-invite-line {
         font-size: 0.92rem;
         letter-spacing: 0.05em;
+        margin-top: 2px;
         margin-bottom: 6px;
     }
 
@@ -1493,6 +1494,14 @@ footer {
     .scratch-card-container .scratch-meta .hero-date {
         font-size: 0.78rem;
         letter-spacing: 0.01em;
+    }
+
+    .scratch-card-container .scratch-meta {
+        padding-top: 16px;
+    }
+
+    .scratch-invite-line {
+        margin-top: 3px;
     }
 
     .scratch-card-container .scratch-meta .countdown {
