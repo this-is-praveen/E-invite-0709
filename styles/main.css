@@ -1599,7 +1599,8 @@ footer {
 /* Mobile layout hardening */
 @media (max-width: 768px) {
     .hero {
-        min-height: 68vh;
+        min-height: 100vh;
+        min-height: 100svh;
     }
 
     #music-btn {
@@ -1616,8 +1617,8 @@ footer {
     }
 
     .hero-content {
-        margin-top: 20px;
-        padding: 30px 16px 24px;
+        margin-top: 0;
+        padding: 28px 16px 24px;
     }
 
     .hero-content h4 {
@@ -1783,12 +1784,13 @@ footer {
 
 @media (max-width: 480px) {
     .hero {
-        min-height: 58vh;
+        min-height: 100vh;
+        min-height: 100svh;
     }
 
     .hero-content {
-        margin-top: 10px;
-        padding: 22px 12px 18px;
+        margin-top: 0;
+        padding: 24px 12px 18px;
     }
 
     .envelope-content {
@@ -1919,11 +1921,12 @@ footer {
 
 @media (max-width: 720px) and (orientation: landscape) {
     .hero {
-        min-height: 120vh;
+        min-height: 100vh;
+        min-height: 100svh;
     }
 
     .hero-content {
-        margin-top: 24px;
+        margin-top: 0;
     }
 }
 
