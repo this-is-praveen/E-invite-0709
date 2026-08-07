@@ -1440,6 +1440,42 @@ footer {
     transform: scale(1) rotate(0deg);
 }
 
+/* React-reveal style directional slide system */
+.reveal-item {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition:
+        opacity 0.9s cubic-bezier(.22, .61, .36, 1),
+        transform 0.9s cubic-bezier(.22, .61, .36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+.reveal-item[data-reveal='left'] {
+    transform: translate3d(-42px, 0, 0);
+}
+
+.reveal-item[data-reveal='right'] {
+    transform: translate3d(42px, 0, 0);
+}
+
+.reveal-item[data-reveal='up'] {
+    transform: translate3d(0, 34px, 0);
+}
+
+.reveal-item.visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-item {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 /* Text Reveal Animation */
 .text-reveal {
     position: relative;

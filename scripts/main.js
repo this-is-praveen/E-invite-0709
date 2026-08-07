@@ -421,6 +421,46 @@
         eventsContainer.appendChild(card);
     });
 
+    function setupSlideRevealGroups() {
+        const revealSections = document.querySelectorAll('#main-screen > section, #invite-content > section, #wedding-footer');
+        const directionCycle = ['left', 'right', 'up'];
+        const targetSelector = [
+            '.kolam-section',
+            '.sec-title',
+            '.sec-desc',
+            '.guest-welcome-line',
+            '.scratch-card-container',
+            '.scratch-hint',
+            '.welcome-content',
+            '.welcome-image',
+            '.couple-main-photo-wrap',
+            '.couple-fun-lines',
+            '.deity-relief',
+            '.events-grid',
+            '.event-card',
+            '.map-container',
+            '.footer-inner'
+        ].join(', ');
+
+        revealSections.forEach((section, sectionIndex) => {
+            const sectionDirection = directionCycle[sectionIndex % directionCycle.length];
+            const targets = section.querySelectorAll(targetSelector);
+
+            targets.forEach((target, targetIndex) => {
+                target.classList.add('reveal-item');
+
+                const itemDirection = targetIndex % 3 === 2
+                    ? 'up'
+                    : (targetIndex % 2 === 0 ? sectionDirection : directionCycle[(sectionIndex + 1) % directionCycle.length]);
+
+                target.dataset.reveal = itemDirection;
+                target.style.setProperty('--reveal-delay', `${Math.min(targetIndex * 90, 540)}ms`);
+            });
+        });
+    }
+
+    setupSlideRevealGroups();
+
     // Reveal all dynamic text after values are injected to avoid placeholder flash.
     releaseHydrationLock();
 
@@ -640,7 +680,7 @@
 
     // Observe elements with new animations
     setTimeout(() => {
-        document.querySelectorAll('.fade-in-up, .scale-in, .kolam-scale').forEach(el => observer.observe(el));
+        document.querySelectorAll('.fade-in-up, .scale-in, .kolam-scale, .reveal-item').forEach(el => observer.observe(el));
     }, 100);
 
     // 7. SCRATCH CARD FUNCTIONALITY - REVEAL ITINERARY
@@ -738,7 +778,7 @@
                 // 3. Re-register scroll-reveal observer for newly visible elements
                 setTimeout(() => {
                     document.querySelectorAll(
-                        '#invite-content .fade-in-up, #invite-content .scale-in, #invite-content .kolam-scale'
+                        '#invite-content .fade-in-up, #invite-content .scale-in, #invite-content .kolam-scale, #invite-content .reveal-item, #wedding-footer .reveal-item'
                     ).forEach(el => observer.observe(el));
                 }, 150);
             }
