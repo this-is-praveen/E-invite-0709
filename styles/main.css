@@ -31,6 +31,7 @@
 
 body {
     font-family: var(--font-sans);
+    position: relative;
     background-color: var(--ivory);
     background-image:
         radial-gradient(1200px 720px at 12% 18%, rgba(222, 201, 122, 0.24) 0%, transparent 56%),
@@ -38,8 +39,8 @@ body {
         radial-gradient(860px 540px at 50% 92%, rgba(237, 227, 204, 0.72) 0%, transparent 62%),
         linear-gradient(165deg, #fffdf8 0%, #f8f1df 46%, #efe3c9 100%);
     background-attachment: fixed;
-    background-size: 160% 160%, 145% 145%, 135% 135%, 100% 100%;
-    animation: appAmbientShift 26s ease-in-out infinite alternate;
+    background-size: 180% 180%, 165% 165%, 150% 150%, 100% 100%;
+    animation: appAmbientShift 30s ease-in-out infinite alternate;
     color: var(--dark);
     overflow-x: hidden;
     overflow-y: hidden;
@@ -48,13 +49,57 @@ body {
     text-rendering: optimizeLegibility;
 }
 
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+        conic-gradient(from 210deg at 75% 20%, rgba(255, 244, 213, 0.22), rgba(222, 201, 122, 0.06), rgba(255, 244, 213, 0.2)),
+        radial-gradient(680px 420px at 15% 80%, rgba(255, 252, 241, 0.24), transparent 70%);
+    filter: blur(2px);
+    animation: appAuroraDrift 22s linear infinite;
+}
+
 @keyframes appAmbientShift {
     0% {
         background-position: 0% 0%, 100% 0%, 50% 100%, 50% 50%;
     }
 
+    50% {
+        background-position: 6% 5%, 96% 8%, 52% 96%, 50% 50%;
+    }
+
     100% {
-        background-position: 8% 6%, 94% 10%, 54% 94%, 50% 50%;
+        background-position: 12% 10%, 90% 14%, 56% 92%, 50% 50%;
+    }
+}
+
+@keyframes appAuroraDrift {
+    0% {
+        transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translate3d(2.5%, 1.5%, 0) rotate(6deg) scale(1.04);
+        opacity: 0.95;
+    }
+
+    100% {
+        transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1);
+        opacity: 0.7;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        animation: none;
+    }
+
+    body::before {
+        animation: none;
     }
 }
 
@@ -80,12 +125,83 @@ body.scrollable {
 .is-hydrating .scratch-invite-line,
 .is-hydrating #welcome-title,
 .is-hydrating #welcome-message,
+.is-hydrating #welcome-join-highlight,
 .is-hydrating #divine-blessing-title,
 .is-hydrating #divine-blessing-message,
 .is-hydrating #couple-fun-line,
 .is-hydrating #footer-presence-note,
 .is-hydrating #footer-names-text {
     visibility: hidden;
+}
+
+.welcome-join-highlight {
+    position: relative;
+    max-width: 62ch;
+    margin: -18px auto 14px;
+    padding: 12px 16px;
+    border: 1px solid rgba(184, 145, 58, 0.38);
+    border-radius: 999px;
+    background: linear-gradient(120deg, rgba(255, 252, 242, 0.95) 0%, rgba(245, 232, 198, 0.9) 50%, rgba(255, 252, 242, 0.95) 100%);
+    color: var(--dark-soft);
+    font-family: var(--font-display);
+    font-size: clamp(0.94rem, 2.35vw, 1.16rem);
+    font-style: italic;
+    line-height: 1.45;
+    text-align: center;
+    box-shadow: 0 10px 24px rgba(184, 145, 58, 0.14);
+    overflow: hidden;
+    animation: invitePulse 3.6s ease-in-out infinite;
+}
+
+.welcome-join-highlight::before {
+    content: '';
+    position: absolute;
+    top: -35%;
+    left: -45%;
+    width: 42%;
+    height: 170%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: rotate(18deg);
+    animation: inviteShine 4.8s ease-in-out infinite;
+}
+
+@keyframes invitePulse {
+    0%,
+    100% {
+        transform: translateY(0);
+        box-shadow: 0 10px 24px rgba(184, 145, 58, 0.14);
+    }
+
+    50% {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(184, 145, 58, 0.22);
+    }
+}
+
+@keyframes inviteShine {
+    0%,
+    70%,
+    100% {
+        transform: translateX(0) rotate(18deg);
+        opacity: 0;
+    }
+
+    76% {
+        opacity: 0.85;
+    }
+
+    92% {
+        transform: translateX(360%) rotate(18deg);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .welcome-join-highlight {
+        margin: -14px auto 12px;
+        border-radius: 18px;
+        padding: 11px 12px;
+    }
 }
 
 #door-wrapper {
