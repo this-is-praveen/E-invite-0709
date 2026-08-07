@@ -322,14 +322,55 @@ body.scrollable {
     }
 }
 
-.kolam-divider-door {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 10px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.6;
+
+.invite-cute-sparkles {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin: -4px 0 10px;
+    min-height: 16px;
+}
+
+.invite-cute-sparkles .spark {
+    display: inline-block;
+    color: var(--gold);
+    opacity: 0.65;
+    filter: drop-shadow(0 0 8px rgba(222, 201, 122, 0.26));
+    animation: inviteSparkFloat 2.9s ease-in-out infinite;
+}
+
+.invite-cute-sparkles .spark-1 {
+    font-size: 0.68rem;
+    animation-delay: 0s;
+}
+
+.invite-cute-sparkles .spark-2 {
+    font-size: 0.84rem;
+    animation-delay: 0.48s;
+}
+
+.invite-cute-sparkles .spark-3 {
+    font-size: 0.72rem;
+    animation-delay: 0.92s;
+}
+
+@keyframes inviteSparkFloat {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: translateY(-3px) scale(1.1);
+        opacity: 0.9;
+    }
+
+    70% {
+        transform: translateY(-1px) scale(0.95);
+        opacity: 0.62;
+    }
 }
 
 .envelope-content p {
@@ -1995,6 +2036,23 @@ footer {
         letter-spacing: 3px;
         font-size: 0.66rem;
         margin-bottom: 14px;
+    }
+
+    .invite-cute-sparkles {
+        gap: 12px;
+        margin: -2px 0 8px;
+    }
+
+    .invite-cute-sparkles .spark-1 {
+        font-size: 0.62rem;
+    }
+
+    .invite-cute-sparkles .spark-2 {
+        font-size: 0.76rem;
+    }
+
+    .invite-cute-sparkles .spark-3 {
+        font-size: 0.66rem;
     }
 
     .btn {
