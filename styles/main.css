@@ -72,6 +72,22 @@ body.scrollable {
     overflow-y: auto;
 }
 
+.is-hydrating #env-names,
+.is-hydrating #hero-names-text,
+.is-hydrating #hero-date-text,
+.is-hydrating #hero-venue-text,
+.is-hydrating #guest-welcome-line,
+.is-hydrating .scratch-invite-line,
+.is-hydrating #welcome-title,
+.is-hydrating #welcome-message,
+.is-hydrating #divine-blessing-title,
+.is-hydrating #divine-blessing-message,
+.is-hydrating #couple-fun-line,
+.is-hydrating #footer-presence-note,
+.is-hydrating #footer-names-text {
+    visibility: hidden;
+}
+
 #door-wrapper {
     position: fixed;
     inset: 0;

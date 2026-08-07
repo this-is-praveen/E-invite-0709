@@ -1,5 +1,16 @@
 ﻿document.addEventListener("DOMContentLoaded", async () => {
     const cfg = window.weddingConfig;
+    const hydrationFallbackId = setTimeout(() => {
+        document.documentElement.classList.remove('is-hydrating');
+    }, 3500);
+    let hydrationReleased = false;
+
+    function releaseHydrationLock() {
+        if (hydrationReleased) return;
+        hydrationReleased = true;
+        clearTimeout(hydrationFallbackId);
+        document.documentElement.classList.remove('is-hydrating');
+    }
 
     function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -409,6 +420,9 @@
         `;
         eventsContainer.appendChild(card);
     });
+
+    // Reveal all dynamic text after values are injected to avoid placeholder flash.
+    releaseHydrationLock();
 
     // 3. DOOR ANIMATION, AUDIO, & PARTICLES
     const doorWrapper = document.getElementById('door-wrapper');
