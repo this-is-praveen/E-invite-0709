@@ -473,6 +473,30 @@
     const musicBtn = document.getElementById('music-btn');
     const particleContainer = document.getElementById('particles-js');
     const royalRevealOverlay = document.getElementById('royal-reveal-overlay');
+    const configuredMusicUrls = Array.isArray(cfg.musicUrls) ? cfg.musicUrls.filter(Boolean) : [];
+    const availableMusicUrls = configuredMusicUrls.length ? configuredMusicUrls : (cfg.musicUrl ? [cfg.musicUrl] : []);
+    const MUSIC_LAST_TRACK_KEY = 'weddingInvite:lastMusicTrack';
+    let activeMusicUrl = '';
+    let audioFallbackAttempted = false;
+
+    function pickMusicUrl() {
+        if (!availableMusicUrls.length) return '';
+        if (availableMusicUrls.length === 1) return availableMusicUrls[0];
+
+        const lastTrack = sessionStorage.getItem(MUSIC_LAST_TRACK_KEY);
+        const randomIndex = Math.floor(Math.random() * availableMusicUrls.length);
+        let picked = availableMusicUrls[randomIndex];
+
+        // Avoid repeating the same track back-to-back on refresh when possible.
+        if (picked === lastTrack) {
+            picked = availableMusicUrls[(randomIndex + 1) % availableMusicUrls.length];
+        }
+
+        sessionStorage.setItem(MUSIC_LAST_TRACK_KEY, picked);
+        return picked;
+    }
+
+    activeMusicUrl = pickMusicUrl();
     let audioActionInFlight = false;
     let audioPrimed = false;
     let audioGestureRetryArmed = false;
@@ -501,8 +525,9 @@
     }
 
     function ensureAudioSource() {
+        if (!activeMusicUrl) return;
         if (!audio.src || audio.src === window.location.href) {
-            audio.src = cfg.musicUrl;
+            audio.src = activeMusicUrl;
             audio.volume = 0.25;
             audio.load();
         }
@@ -550,6 +575,17 @@
 
     audio.addEventListener('play', syncMusicButton);
     audio.addEventListener('pause', syncMusicButton);
+    audio.addEventListener('error', () => {
+        if (audioFallbackAttempted || availableMusicUrls.length < 2) return;
+        const fallback = availableMusicUrls.find((track) => track !== activeMusicUrl);
+        if (!fallback) return;
+
+        audioFallbackAttempted = true;
+        activeMusicUrl = fallback;
+        audio.removeAttribute('src');
+        audio.load();
+        ensureAudioSource();
+    });
 
     async function startRevealAudio() {
         if (audioActionInFlight) return false;
