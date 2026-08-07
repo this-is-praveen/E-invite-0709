@@ -476,6 +476,7 @@
     let audioActionInFlight = false;
     let audioPrimed = false;
     let audioGestureRetryArmed = false;
+    let shouldResumeAfterForeground = false;
     let royalRevealRunning = false;
 
     audio.setAttribute('playsinline', '');
@@ -677,6 +678,7 @@
     musicBtn.addEventListener('click', async () => {
         if (audioActionInFlight) return;
         if (!audio.paused) {
+            shouldResumeAfterForeground = false;
             audio.pause();
             syncMusicButton();
         } else {
@@ -684,11 +686,38 @@
         }
     });
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && document.body.classList.contains('reveal-opened') && audio.paused) {
+    function pauseAudioForBackground() {
+        if (!document.body.classList.contains('reveal-opened')) return;
+        if (!audio.paused) {
+            shouldResumeAfterForeground = true;
+            audio.pause();
+            syncMusicButton();
+        }
+    }
+
+    async function resumeAudioOnForeground() {
+        if (!document.body.classList.contains('reveal-opened')) return;
+        if (!shouldResumeAfterForeground) return;
+
+        shouldResumeAfterForeground = false;
+        const started = await startRevealAudio();
+        if (!started && audio.paused) {
             armAudioGestureRetry();
         }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            pauseAudioForBackground();
+            return;
+        }
+        resumeAudioOnForeground();
     });
+
+    window.addEventListener('blur', pauseAudioForBackground);
+    window.addEventListener('focus', resumeAudioOnForeground);
+    window.addEventListener('pagehide', pauseAudioForBackground);
+    window.addEventListener('pageshow', resumeAudioOnForeground);
 
     // 4. COUNTDOWN TIMER
     function updateCountdown() {
