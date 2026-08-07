@@ -126,6 +126,7 @@ body.scrollable {
 .is-hydrating #welcome-title,
 .is-hydrating #welcome-message,
 .is-hydrating #welcome-join-highlight,
+.is-hydrating #itinerary-join-note,
 .is-hydrating #divine-blessing-title,
 .is-hydrating #divine-blessing-message,
 .is-hydrating #couple-fun-line,
@@ -1037,6 +1038,68 @@ section {
     gap: 30px;
 }
 
+.itinerary-join-note {
+    position: relative;
+    width: min(760px, 100%);
+    margin: 24px auto 0;
+    padding: 13px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(184, 145, 58, 0.4);
+    background: linear-gradient(120deg, rgba(255, 252, 245, 0.95) 0%, rgba(250, 238, 205, 0.95) 52%, rgba(255, 252, 245, 0.95) 100%);
+    box-shadow: 0 12px 24px rgba(184, 145, 58, 0.15);
+    color: var(--text-mid);
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.25vw, 1.2rem);
+    font-style: italic;
+    line-height: 1.52;
+    text-align: center;
+    overflow: hidden;
+    animation: itineraryPulse 3.9s ease-in-out infinite;
+}
+
+.itinerary-join-note::before {
+    content: '';
+    position: absolute;
+    top: -25%;
+    left: -42%;
+    width: 38%;
+    height: 150%;
+    transform: rotate(18deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: itineraryShine 5.2s ease-in-out infinite;
+}
+
+@keyframes itineraryPulse {
+    0%,
+    100% {
+        transform: translateY(0);
+        box-shadow: 0 12px 24px rgba(184, 145, 58, 0.15);
+    }
+
+    50% {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(184, 145, 58, 0.22);
+    }
+}
+
+@keyframes itineraryShine {
+    0%,
+    72%,
+    100% {
+        transform: translateX(0) rotate(18deg);
+        opacity: 0;
+    }
+
+    78% {
+        opacity: 0.9;
+    }
+
+    92% {
+        transform: translateX(360%) rotate(18deg);
+        opacity: 0;
+    }
+}
+
 .event-card {
     padding: 45px 25px;
     border: 1px solid var(--gold-light);
@@ -1776,6 +1839,14 @@ footer {
     .event-detail {
         font-size: 0.82rem;
         letter-spacing: 0.8px;
+    }
+
+    .itinerary-join-note {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        font-size: clamp(0.95rem, 3.2vw, 1.04rem);
+        line-height: 1.45;
     }
 
     .map-container {

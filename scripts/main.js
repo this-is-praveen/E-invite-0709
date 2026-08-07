@@ -310,6 +310,7 @@
     document.getElementById('welcome-title').textContent = cfg.welcomeTitle;
     document.getElementById('welcome-message').textContent = cfg.welcomeMessage;
     document.getElementById('welcome-join-highlight').textContent = cfg.inviteJoinLine || 'We warmly invite you to join us and bless our new beginning.';
+    document.getElementById('itinerary-join-note').textContent = cfg.itineraryJoinNote || 'Save the date and join us without a miss.';
     document.getElementById('divine-blessing-title').textContent = cfg.divineBlessingTitle;
     document.getElementById('divine-blessing-message').textContent = cfg.divineBlessingMessage;
     document.getElementById('couple-fun-line').textContent =
