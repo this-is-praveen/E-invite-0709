@@ -475,6 +475,7 @@
     const royalRevealOverlay = document.getElementById('royal-reveal-overlay');
     let audioActionInFlight = false;
     let audioPrimed = false;
+    let audioGestureRetryArmed = false;
     let royalRevealRunning = false;
 
     audio.setAttribute('playsinline', '');
@@ -506,10 +507,9 @@
         }
     }
 
-    async function primeAudioOnGesture() {
-        if (audioPrimed) return true;
+    async function forceUnlockAudioWithGesture() {
+        ensureAudioSource();
         try {
-            ensureAudioSource();
             await audio.play();
             audio.pause();
             audio.currentTime = 0;
@@ -517,40 +517,69 @@
             return true;
         } catch (err) {
             if (!err || err.name !== 'AbortError') {
-                console.warn('Audio priming failed on this gesture.', err);
+                console.warn('Audio unlock attempt failed.', err);
             }
             return false;
         }
+    }
+
+    function armAudioGestureRetry() {
+        if (audioGestureRetryArmed) return;
+        audioGestureRetryArmed = true;
+
+        const retryPlayback = async () => {
+            const played = await startRevealAudio();
+            if (played || !audio.paused) {
+                window.removeEventListener('pointerdown', retryPlayback, true);
+                window.removeEventListener('touchend', retryPlayback, true);
+                window.removeEventListener('keydown', retryPlayback, true);
+                audioGestureRetryArmed = false;
+            }
+        };
+
+        window.addEventListener('pointerdown', retryPlayback, true);
+        window.addEventListener('touchend', retryPlayback, true);
+        window.addEventListener('keydown', retryPlayback, true);
+    }
+
+    async function primeAudioOnGesture() {
+        if (audioPrimed) return true;
+        return forceUnlockAudioWithGesture();
     }
 
     audio.addEventListener('play', syncMusicButton);
     audio.addEventListener('pause', syncMusicButton);
 
     async function startRevealAudio() {
-        if (audioActionInFlight) return;
+        if (audioActionInFlight) return false;
         if (!audio.paused) {
             musicBtn.style.display = 'block';
             syncMusicButton();
-            return;
+            return true;
         }
         audioActionInFlight = true;
         musicBtn.disabled = true;
         musicBtn.style.display = 'block';
         syncMusicButton();
+        let started = false;
         try {
             ensureAudioSource();
             await audio.play();
             audioPrimed = true;
+            started = true;
         } catch (err) {
             if (!err || err.name !== 'AbortError') {
-                musicBtn.dataset.state = 'Tap to play';
+                musicBtn.dataset.state = 'Tap anywhere to play';
                 console.warn('Audio playback is blocked until the next tap.', err);
             }
+            armAudioGestureRetry();
         } finally {
             audioActionInFlight = false;
             musicBtn.disabled = false;
             syncMusicButton();
         }
+
+        return started;
     }
 
     function playTempleChime() {
@@ -606,6 +635,11 @@
         }, 2100);
     }
 
+    openBtn.addEventListener('pointerdown', () => {
+        // Pre-unlock audio as early as possible on touch devices.
+        primeAudioOnGesture();
+    }, { once: true });
+
     openBtn.addEventListener('click', async () => {
         // Prevent double-clicks
         openBtn.disabled = true;
@@ -647,6 +681,12 @@
             syncMusicButton();
         } else {
             await startRevealAudio();
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && document.body.classList.contains('reveal-opened') && audio.paused) {
+            armAudioGestureRetry();
         }
     });
 
