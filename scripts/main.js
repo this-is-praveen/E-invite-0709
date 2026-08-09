@@ -502,6 +502,19 @@
     let audioGestureRetryArmed = false;
     let shouldResumeAfterForeground = false;
     let royalRevealRunning = false;
+    let mapInteractionBlurGuardUntil = 0;
+
+    function markMapInteractionBlurGuard() {
+        mapInteractionBlurGuardUntil = Date.now() + 1500;
+    }
+
+    function shouldIgnoreBlurPause() {
+        if (Date.now() < mapInteractionBlurGuardUntil) return true;
+        const activeEl = document.activeElement;
+        return !!(activeEl && activeEl.tagName === 'IFRAME' && (
+            activeEl.id === 'map-iframe' || activeEl.id === 'reception-map-iframe'
+        ));
+    }
 
     audio.setAttribute('playsinline', '');
     audio.setAttribute('webkit-playsinline', '');
@@ -528,7 +541,7 @@
         if (!activeMusicUrl) return;
         if (!audio.src || audio.src === window.location.href) {
             audio.src = activeMusicUrl;
-            audio.volume = 0.25;
+            audio.volume = 0.4;
             audio.load();
         }
     }
@@ -586,6 +599,29 @@
         audio.load();
         ensureAudioSource();
     });
+
+    function bindMapInteractionGuard() {
+        const targets = [
+            document.getElementById('map-iframe'),
+            document.getElementById('reception-map-iframe'),
+            ...Array.from(document.querySelectorAll('.map-container'))
+        ].filter(Boolean);
+
+        if (!targets.length) return;
+
+        const mark = () => {
+            markMapInteractionBlurGuard();
+        };
+
+        targets.forEach((target) => {
+            target.addEventListener('pointerdown', mark, true);
+            target.addEventListener('touchstart', mark, { capture: true, passive: true });
+            target.addEventListener('mousedown', mark, true);
+            target.addEventListener('focusin', mark, true);
+        });
+    }
+
+    bindMapInteractionGuard();
 
     async function startRevealAudio() {
         if (audioActionInFlight) return false;
@@ -750,7 +786,10 @@
         resumeAudioOnForeground();
     });
 
-    window.addEventListener('blur', pauseAudioForBackground);
+    window.addEventListener('blur', () => {
+        if (shouldIgnoreBlurPause()) return;
+        pauseAudioForBackground();
+    });
     window.addEventListener('focus', resumeAudioOnForeground);
     window.addEventListener('pagehide', pauseAudioForBackground);
     window.addEventListener('pageshow', resumeAudioOnForeground);
