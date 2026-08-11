@@ -410,15 +410,57 @@
 
     // 2. GENERATE EVENTS FROM CONFIG
     const eventsContainer = document.getElementById('events-container');
+
+    function toGoogleDateTimeValue(isoString) {
+        const parsed = new Date(isoString);
+        if (Number.isNaN(parsed.getTime())) return '';
+
+        const yyyy = parsed.getUTCFullYear();
+        const mm = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(parsed.getUTCDate()).padStart(2, '0');
+        const hh = String(parsed.getUTCHours()).padStart(2, '0');
+        const min = String(parsed.getUTCMinutes()).padStart(2, '0');
+        const ss = String(parsed.getUTCSeconds()).padStart(2, '0');
+        return `${yyyy}${mm}${dd}T${hh}${min}${ss}Z`;
+    }
+
+    function buildGoogleCalendarUrl(eventItem) {
+        if (!eventItem || !eventItem.startISO) return '';
+
+        const start = toGoogleDateTimeValue(eventItem.startISO);
+        if (!start) return '';
+
+        const endIso = eventItem.endISO || new Date(new Date(eventItem.startISO).getTime() + 2 * 60 * 60 * 1000).toISOString();
+        const end = toGoogleDateTimeValue(endIso);
+        if (!end) return '';
+
+        const eventTitle = `${eventItem.title} - ${cfg.brideName} & ${cfg.groomName}`;
+        const details = `Join us for ${eventItem.title}. We would love to celebrate this special moment with you.`;
+        const reminderOffsetsMinutes = ['10080', '4320', '1440'];
+
+        const params = new URLSearchParams({
+            action: 'TEMPLATE',
+            text: eventTitle,
+            dates: `${start}/${end}`,
+            details,
+            location: eventItem.location || '',
+            reminders: reminderOffsetsMinutes.join(',')
+        });
+
+        return `https://calendar.google.com/calendar/render?${params.toString()}`;
+    }
+
     cfg.events.forEach(ev => {
         const card = document.createElement('div');
         card.className = 'event-card fade-in-up';
+        const calendarUrl = buildGoogleCalendarUrl(ev);
         card.innerHTML = `
             <div class="event-icon">${ev.icon}</div>
             <h3 class="event-title">${ev.title}</h3>
             <p class="event-detail">${ev.date}</p>
             <p class="event-detail">${ev.time}</p>
             ${ev.location ? `<p class="event-detail">${ev.location}</p>` : ''}
+            ${calendarUrl ? `<a class="event-calendar-link" href="${calendarUrl}" target="_blank" rel="noopener noreferrer" aria-label="Add ${ev.title} to Google Calendar">Add to Google Calendar</a>` : ''}
         `;
         eventsContainer.appendChild(card);
     });
